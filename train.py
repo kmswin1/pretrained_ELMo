@@ -32,7 +32,6 @@ def main():
         model.train()
         epoch_start = time.time()
         epoch_loss = 0
-        cnt = 0
         tot = 0
         for i, batch_data in enumerate(dataloader):
             optimizer.zero_grad()
@@ -47,7 +46,6 @@ def main():
             epoch_loss += batch_loss
         end = time.time()
         time_used = end - epoch_start
-        epoch_loss /= cnt
         print ('one epoch time: {} minutes'.format(time_used/60))
         print ('{} epochs'.format(epoch))
         print ('epoch {} loss : {} perplexity : {}'.format(epoch, epoch_loss/train_batch_num, 2**(epoch_loss/train_batch_num)))
