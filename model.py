@@ -52,15 +52,15 @@ class ELMo(nn.Module):
         char_representation = char_representation.reshape(char_representation.size()[0], char_ids.size()[1], -1)
         char_representation = self.char_fc_layer(char_representation)
 
-        forward_input = char_representation
+        forward_input = char_representation[:,:-1,:]
         forward_output1, (h_n, c_n) = self.forward_lstm1(forward_input)
-        proj_forward_output1 = self.dropout(self.forward_projection1(forward_output1) + char_representation) # residual connection
+        proj_forward_output1 = self.dropout(self.forward_projection1(forward_output1) + char_representation[:,:-1,:]) # residual connection
         forward_output2, (h_n, c_n) = self.forward_lstm2(proj_forward_output1)
         proj_forward_output2 = self.dropout(self.forward_projection2(forward_output2) + proj_forward_output1) # residual connection
 
-        backward_input = torch.flip(char_representation, [1])
+        backward_input = torch.flip(char_representation, [1])[:,:-1,:]
         backward_output1, (h_n, c_n) = self.backward_lstm1(backward_input)
-        proj_backward_output1 = self.dropout(self.backward_projection1(backward_output1) + torch.flip(char_representation, [1])) # residual connection
+        proj_backward_output1 = self.dropout(self.backward_projection1(backward_output1) + torch.flip(char_representation, [1])[:,:-1,:]) # residual connection
         backward_output2, (h_n, c_n) = self.backward_lstm2(proj_backward_output1)
         proj_backward_output2 = self.dropout(self.backward_projection2(backward_output2) + proj_backward_output1) # residual connection
 

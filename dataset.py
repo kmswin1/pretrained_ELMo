@@ -53,7 +53,6 @@ class ELMoDataset(Dataset):
             for _ in range(diff):
                 temp.append(self.char2id['<PAD>'])
             char_idx.append(temp)
-        word_idx.append(self.word2id['<EOS>'])
         word_idx = torch.tensor(word_idx, dtype=torch.long, device=self.opts.device)
         char_idx = torch.tensor(char_idx, dtype=torch.long, device=self.opts.device)
         return word_idx, char_idx
