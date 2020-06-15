@@ -40,12 +40,14 @@ def load_data_from_txt(file_path):
     return data
 
 
-def build_vocabulary(data_list, special_tokens=None):
+def build_vocabulary(data_list, word_list, special_tokens=None):
     token2id = {}
     id2token = set()
     for tokens in data_list:
         for token in tokens:
             id2token.add(token)
+    for token in word_list:
+        id2token.add(token)
     id2token = sorted(list(id2token))
     if special_tokens:
         for token in special_tokens:
@@ -128,7 +130,7 @@ def main():
 
     data = get_data(os.path.abspath(RAW_DATA_PATH))
     sentences = data
-    word2id, id2word = build_vocabulary(sentences + words, ['<EOS>', '<SOS>', '<PAD>'])
+    word2id, id2word = build_vocabulary(sentences, words , ['<UNK>', '<EOS>', '<SOS>', '<PAD>'])
     char2id, id2char = build_char_vocabulary(['<PAD>', '<EOS>', '<SOS>', '<UNK>'])
 
     # vocab path check
