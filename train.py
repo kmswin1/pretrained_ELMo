@@ -24,7 +24,7 @@ def main():
         print ("resume training")
         model.load_state_dict(torch.load('model.pt'))
     model.cuda()
-    loss = torch.nn.CrossEntropyLoss()
+    loss = torch.nn.CrossEntropyLoss(ignore_index=0)
     train_batch_num = math.ceil(data.data_size / opts.batch_size)
     valid_batch_num = math.ceil(valid_data.data_size / opts.batch_size)
 
