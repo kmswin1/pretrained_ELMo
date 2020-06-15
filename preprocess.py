@@ -30,13 +30,13 @@ def get_data(data_path):
 
 
 def load_data_from_txt(file_path):
-    with open(file_path, "r") as f:
+    with codecs.open(file_path, "r", "utf-8") as f:
         lines = f.readlines()
         data = []
         for line in lines:
-            sentences = line.split('.')
-            for segment in sentences:
-                data.append(segment)
+            line = line.strip('\n')
+            sentence = ast.literal_eval(line)
+            data.append(sentence)
     return data
 
 
@@ -88,7 +88,7 @@ def build_char_vocabulary(special_tokens=None):
 def main():
     EMBEDDING = sys.argv[2]
     RAW_DATA_PATH = sys.argv[1]
-    VOCAB_PATH = RAW_DATA_PATH + "/vocabulary/"
+    VOCAB_PATH = "data/vocabulary/"
     if EMBEDDING == 'glove':
         GLOVE_PATH = './data/glove.txt'
         PROCESSED_GLOVE_PATH = './data/glove.pt'
@@ -126,9 +126,9 @@ def main():
     # 2. Separate data and create vocabulary files.
     print("Separating the raw data and creating vocab...")
 
-    #data = get_data(os.path.abspath(RAW_DATA_PATH))
-    #sentences = data
-    word2id, id2word = build_vocabulary(words, ['<UNK>', '<EOS>', '<SOS>', '<PAD>'])
+    data = get_data(os.path.abspath(RAW_DATA_PATH))
+    sentences = data
+    word2id, id2word = build_vocabulary(sentences + words, ['<EOS>', '<SOS>', '<PAD>'])
     char2id, id2char = build_char_vocabulary(['<PAD>', '<EOS>', '<SOS>', '<UNK>'])
 
     # vocab path check

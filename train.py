@@ -5,6 +5,7 @@ import time, math, json, os, sys
 from args import get_train_args
 from dataset import ELMoDataset
 from model import ELMo
+from utils import EarlyStopping
 
 def main():
     opts = get_train_args()
@@ -16,6 +17,7 @@ def main():
     print ("load model ...")
     model = ELMo(opts, [data.word_vocab_size, data.char_size])
     optimizer = optim.Adam(model.parameters(), lr=opts.learning_rate)
+    early_stopping = EarlyStopping(5, 0.0)
     if opts.multi == True:
         model = torch.nn.DataParallel(model)
     if opts.resume == True:
@@ -52,7 +54,6 @@ def main():
 
         model.eval()
         valid_loss = 0
-        val_tot = 0
         with torch.no_grad():
             for i, batch_data in enumerate(validloader):
                 word_idx, char_idx = batch_data
@@ -63,8 +64,18 @@ def main():
         print ('valid loss : {} preplexity : {}'.format(valid_loss/valid_batch_num, 2**(valid_loss/valid_batch_num)))
 
         with open('log.txt', 'a') as f:
-            f.write(str(epoch) + ' epoch :' + str(epoch_loss/valid_batch_num) + ' ' + str(2**(epoch_loss/valid_batch_num)) + '\n')
-            f.write(str(epoch) + ' valid :' + str(valid_loss/val_tot) + ' ' + str(2**(valid_loss/val_tot)) + '\n')
+            f.write(str(epoch) + ' epoch :' + str(epoch_loss/train_batch_num) + ' ' + str(2**(epoch_loss/train_batch_num)) + '\n')
+            f.write(str(epoch) + ' valid :' + str(valid_loss/valid_batch_num) + ' ' + str(2**(valid_loss/valid_batch_num)) + '\n')
+
+        # check early stopping
+        if early_stopping(valid_loss):
+            print("[Training is early stopped in %d Epoch.]" % epoch)
+            if not os.path.exists(opts.model_path):
+                os.mkdir(opts.model_path)
+            state_dict = model.state_dict()
+            torch.save(state_dict, os.path.abspath(opts.model_path + '/model.pt'))
+            print("[Saved the trained model successfully.]")
+            break
 
         if epoch % opts.save_step == 0:
             print ("save model...")
